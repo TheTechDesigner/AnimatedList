@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'AnimatedList, AnimatedListState, Directionality | Random',
       theme: ThemeData(
         primaryColor: Color(0xFF832685),
         primaryColorLight: Color(0xFFC81379),
@@ -33,40 +33,43 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String title = 'AnimatedList/State';
 
-  List<Item> items = new List();
+  final items = new List<Item>();
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
-  var _range = Random();
+  final _range = Random();
 
   _addItem() {
     setState(() {
       _listKey.currentState
           .insertItem(items.length, duration: Duration(seconds: 1));
-      int id = _range.nextInt(5000);
+      final id = _range.nextInt(5000);
       items.add(Item(name: 'Add Item $id'));
     });
   }
 
   _removeItem() {
     setState(() {
-      int id = _range.nextInt(items.length);
+      final id = _range.nextInt(items.length);
+      final title = items[0].name;
       _listKey.currentState.removeItem(
         id,
-        (context, animation) => _buildItem(context, 0, animation),
+        (context, animation) => _buildItem(context, 0, animation, title),
         duration: Duration(seconds: 1),
       );
+
       items.removeAt(id);
     });
   }
 
-  Widget _buildItem(
-      BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(BuildContext context, int index,
+      Animation<double> animation, String title) {
     return SizeTransition(
-        key: ValueKey<int>(index),
-        axis: Axis.vertical,
-        sizeFactor: animation,
-        child: ListTile(
-          title: Text('${items[index].name}'),
-        ));
+      key: ValueKey<int>(index),
+      axis: Axis.vertical,
+      sizeFactor: animation,
+      child: ListTile(
+        title: Text('$title'),
+      ),
+    );
   }
 
   @override
@@ -82,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           IconButton(
             icon: Icon(Icons.remove_circle_outline),
-            onPressed: _removeItem,
+            onPressed: items.length > 0 ? _removeItem : null,
           )
         ],
       ),
@@ -92,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
           key: _listKey,
           initialItemCount: items.length,
           itemBuilder: (context, index, animation) {
-            return _buildItem(context, index, animation);
+            return _buildItem(context, index, animation, items[index].name);
           },
         ),
       ),
